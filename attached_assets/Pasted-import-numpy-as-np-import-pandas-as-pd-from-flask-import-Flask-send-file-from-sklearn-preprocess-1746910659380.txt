@@ -1,0 +1,112 @@
+import numpy as np
+import pandas as pd
+from flask import Flask, send_file
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+app = Flask(__name__)
+
+def create_dataframe_male():
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.precision", 3)
+    np.set_printoptions(precision=3, suppress=True)
+    np.random.seed(0)
+    columns = [
+        "Total head height", "Stomion to vertex height", "Pronasale to vertex height", "Inion to vertex height",
+        "Right tragion to vertex height", "Right ectocanthion to vertex height", "Face length", "Glabella to vertex height",
+        "Menton to subnasale length", "Nose length", "Head circumference", "Head length",
+        "Right tragion to ectocanthion length", "Head breadth", "Frontotemporale breadth", "Bitragion breadth",
+        "Bizygomatic breadth", "Biocular breadth", "Interpupillary distance", "Interocular breadth",
+        "Nasal root breadth", "Nose breadth", "Mouth breadth", "Bigonial breadth",
+        "Right tragion to ectocanthion breadth", "Ear length", "Sagittal arc", "Bitragion arc",
+        "Morphologic face height", "Left ectocanthion to vertex height", "Left tragion to vertex height",
+        "Occiput to left ectocanthion distance", "Occiput to left tragion distance", "Occiput to stomion distance",
+        "Glabella to subnasale height", "Physiognomic face height", "Occiput to right tragion distance",
+        "Occiput to right ectocanthion distance", "Sellion to vertex height", "Subnasale to vertex height"
+    ]
+    men_means = np.array([
+        230, 160, 170, 180, 175, 165, 200, 155, 70, 50, 570, 210, 45, 150, 140, 160, 135, 65, 60, 40,
+        30, 35, 80, 120, 50, 60, 220, 230, 180, 150, 150, 180, 185, 190, 120, 190, 175, 175, 140, 160
+    ])
+    men_stds = np.array([
+        10, 8, 8, 8, 7, 7, 10, 7, 5, 4, 15, 10, 4, 6, 6, 6, 5, 4, 3, 3,
+        2, 2, 4, 6, 3, 4, 12, 12, 10, 5, 5, 7, 7, 8, 4, 8, 7, 7, 5, 5
+    ])
+    num_samples = 100
+    data = np.random.normal(loc=men_means, scale=men_stds, size=(num_samples, len(columns)))
+    return pd.DataFrame(data, columns=columns)
+
+def create_dataframe_female():
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.precision", 3)
+    np.set_printoptions(precision=3, suppress=True)
+    np.random.seed(1)
+    columns = [
+        "Total head height", "Stomion to vertex height", "Pronasale to vertex height", "Inion to vertex height",
+        "Right tragion to vertex height", "Right ectocanthion to vertex height", "Face length", "Glabella to vertex height",
+        "Menton to subnasale length", "Nose length", "Head circumference", "Head length",
+        "Right tragion to ectocanthion length", "Head breadth", "Frontotemporale breadth", "Bitragion breadth",
+        "Bizygomatic breadth", "Biocular breadth", "Interpupillary distance", "Interocular breadth",
+        "Nasal root breadth", "Nose breadth", "Mouth breadth", "Bigonial breadth",
+        "Right tragion to ectocanthion breadth", "Ear length", "Sagittal arc", "Bitragion arc",
+        "Morphologic face height", "Left ectocanthion to vertex height", "Left tragion to vertex height",
+        "Occiput to left ectocanthion distance", "Occiput to left tragion distance", "Occiput to stomion distance",
+        "Glabella to subnasale height", "Physiognomic face height", "Occiput to right tragion distance",
+        "Occiput to right ectocanthion distance", "Sellion to vertex height", "Subnasale to vertex height"
+    ]
+    men_means = np.array([
+        230, 160, 170, 180, 175, 165, 200, 155, 70, 50, 570, 210, 45, 150, 140, 160, 135, 65, 60, 40,
+        30, 35, 80, 120, 50, 60, 220, 230, 180, 150, 150, 180, 185, 190, 120, 190, 175, 175, 140, 160
+    ])
+    men_stds = np.array([
+        10, 8, 8, 8, 7, 7, 10, 7, 5, 4, 15, 10, 4, 6, 6, 6, 5, 4, 3, 3,
+        2, 2, 4, 6, 3, 4, 12, 12, 10, 5, 5, 7, 7, 8, 4, 8, 7, 7, 5, 5
+    ])
+    modifications = np.array([
+        20, 10, 10, 10, 10, 10, 20, 10, 5, 5, 30, 10, 5, 10, 10, 10, 10, 5, 5, 5,
+        5, 5, 10, 10, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
+    ])
+    female_means = men_means - modifications
+    female_stds = men_stds * 0.9
+    num_samples = 56
+    data = np.random.normal(loc=female_means, scale=female_stds, size=(num_samples, len(columns)))
+    return pd.DataFrame(data, columns=columns)
+
+@app.route('/')
+def download():
+    df_male = create_dataframe_male()
+    df_female = create_dataframe_female()
+    
+    male_percentiles = df_male.quantile([0.05, 0.50, 0.95]).round(3)
+    male_percentiles.index = ['5th Percentile', '50th Percentile', '95th Percentile']
+    
+    female_percentiles = df_female.quantile([0.05, 0.50, 0.95]).round(3)
+    female_percentiles.index = ['5th Percentile', '50th Percentile', '95th Percentile']
+    
+    scaler_m = StandardScaler()
+    male_scaled = scaler_m.fit_transform(df_male)
+    pca_m = PCA(n_components=3)  # Using 3 PCA components
+    male_pca = pca_m.fit_transform(male_scaled)
+    male_pca_df = pd.DataFrame(male_pca, columns=[f'PC{i+1}' for i in range(3)])
+    
+    scaler_f = StandardScaler()
+    female_scaled = scaler_f.fit_transform(df_female)
+    pca_f = PCA(n_components=3)  # Using 3 PCA components
+    female_pca = pca_f.fit_transform(female_scaled)
+    female_pca_df = pd.DataFrame(female_pca, columns=[f'PC{i+1}' for i in range(3)])
+    
+    excel_filename = 'combined_measurements_data.xlsx'
+    with pd.ExcelWriter(excel_filename, engine='openpyxl') as writer:
+        df_male.to_excel(writer, sheet_name='Male Raw Data', index=False)
+        male_percentiles.to_excel(writer, sheet_name='Male Percentiles')
+        male_pca_df.to_excel(writer, sheet_name='Male PCA', index=False)
+        df_female.to_excel(writer, sheet_name='Female Raw Data', index=False)
+        female_percentiles.to_excel(writer, sheet_name='Female Percentiles')
+        female_pca_df.to_excel(writer, sheet_name='Female PCA', index=False)
+    
+    return send_file(excel_filename, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)

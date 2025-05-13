@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+
+{% block title %}Tactical Helmet Design Analysis{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-hard-hat me-2"></i>Tactical Helmet Design Parameter Analysis
+                    </h4>
+                    <p class="mb-0 lead">Based on MIL-STD-1472 Human Engineering Standards</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p>This analysis tool generates design specifications for tactical helmets based on anthropometric data, ensuring compliance with MIL-STD-1472 Human Engineering standards.</p>
+                            
+                            <h5 class="mt-4">Key Features:</h5>
+                            <ul>
+                                <li>Analysis of critical head measurements for the 5th to 95th percentile population</li>
+                                <li>Gender-specific measurements for optimal fit across diverse users</li>
+                                <li>Size categorization (XS, S, M, L, XL) with population coverage statistics</li>
+                                <li>Design clearance factors for equipment accommodation and comfort</li>
+                                <li>Visualization of head measurement distributions and size categories</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="my-3">
+                                <i class="fas fa-hard-hat fa-5x text-primary"></i>
+                            </div>
+                            
+                            <div class="mt-4">
+                                {% if specs_exist %}
+                                <a href="{{ url_for('download_specifications') }}" class="btn btn-success">
+                                    <i class="fas fa-file-excel me-2"></i>Download Specifications
+                                </a>
+                                {% else %}
+                                <form action="{{ url_for('run_helmet_analysis') }}" method="post">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-play me-2"></i>Run Analysis
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if specs_exist %}
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Analysis Results</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="helmetTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="distribution-tab" data-bs-toggle="tab" data-bs-target="#distribution" type="button" role="tab">
+                                Size Distribution
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="gender-tab" data-bs-toggle="tab" data-bs-target="#gender" type="button" role="tab">
+                                Gender Comparison
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="design-tab" data-bs-toggle="tab" data-bs-target="#design" type="button" role="tab">
+                                Design Ranges
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content p-4" id="helmetTabContent">
+                        <div class="tab-pane fade show active" id="distribution" role="tabpanel">
+                            <h5>Head Circumference Distribution with Size Categories</h5>
+                            <p class="text-muted">Shows the distribution of head circumference measurements for males and females with helmet size ranges overlaid.</p>
+                            <img src="{{ url_for('design_files', filename='helmet_size_distribution.png') }}" alt="Size Distribution" class="img-fluid mx-auto d-block">
+                        </div>
+                        <div class="tab-pane fade" id="gender" role="tabpanel">
+                            <h5>Male vs Female Head Dimensions</h5>
+                            <p class="text-muted">Radar chart comparing the relative differences in key head measurements between males and females.</p>
+                            <img src="{{ url_for('design_files', filename='gender_comparison_radar.png') }}" alt="Gender Comparison" class="img-fluid mx-auto d-block">
+                        </div>
+                        <div class="tab-pane fade" id="design" role="tabpanel">
+                            <h5>Design Range for Tactical Helmet Parameters</h5>
+                            <p class="text-muted">Shows the design range from 5th percentile female to 95th percentile male for each key measurement, with MIL-STD-1472 clearance factors applied.</p>
+                            <img src="{{ url_for('design_files', filename='design_range_chart.png') }}" alt="Design Ranges" class="img-fluid mx-auto d-block">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">MIL-STD-1472 Implementation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Population Accommodation (Section 4.4.1)</h6>
+                            <p>Design accommodates 5th through 95th percentile values of the user population.</p>
+                            
+                            <h6>Special Populations (Section 4.4.2)</h6>
+                            <p>Gender-specific analysis ensures both male and female populations are properly accommodated.</p>
+                            
+                            <h6>Anthropometry (Section 5.6.3)</h6>
+                            <p>Uses critical head/face dimensions for design to ensure proper fit and comfort.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Size Ranges (Section 5.6.3.5)</h6>
+                            <p>Creates appropriate sizing ranges for operational equipment with coverage statistics.</p>
+                            
+                            <h6>Equipment Dimensions (Section 5.6.4)</h6>
+                            <p>Applies clearance factors for comfort, functionality, and equipment integration such as communications systems.</p>
+                            
+                            <h6>Individual Analysis</h6>
+                            <p>Use the <a href="{{ url_for('individual_fit') }}">Individual Fit Analysis</a> tool to check specific measurements against these specifications.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

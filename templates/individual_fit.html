@@ -1,0 +1,238 @@
+{% extends "layout.html" %}
+
+{% block title %}Individual Helmet Fit Analysis{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-check me-2"></i>Individual Helmet Fit Analysis
+                    </h4>
+                    <p class="mb-0 lead">Check your measurements against MIL-STD-1472 design parameters</p>
+                </div>
+                <div class="card-body">
+                    {% if not specs_exist %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Helmet design specifications have not been generated yet.</strong> Please run the 
+                        <a href="{{ url_for('helmet_design') }}" class="alert-link">Tactical Helmet Design Analysis</a> 
+                        first to generate the specifications.
+                    </div>
+                    {% else %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>Enter your head measurements below to analyze how well a tactical helmet would fit your specific dimensions. The system will compare your measurements to the MIL-STD-1472 design parameters and recommend the appropriate size.</p>
+                            
+                            <h5 class="mt-4">Measurement Instructions:</h5>
+                            <ul>
+                                <li><strong>Head Circumference:</strong> Measure around the widest part of your head, just above the ears and eyebrows.</li>
+                                <li><strong>Head Breadth:</strong> Maximum width across the head, above the ears.</li>
+                                <li><strong>Head Length:</strong> Maximum front-to-back length from glabella to occiput.</li>
+                                <li><strong>Total Head Height:</strong> Vertical distance from chin to the top of the head.</li>
+                                <li><strong>Bitragion Breadth:</strong> Distance between the two ear tragion points.</li>
+                            </ul>
+                            <p class="text-muted small">Note: All measurements should be in millimeters (mm).</p>
+                        </div>
+                        <div class="col-md-6">
+                            <form action="{{ url_for('analyze_fit') }}" method="post" class="mt-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Gender</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male" checked>
+                                        <label class="form-check-label" for="genderMale">
+                                            Male
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female">
+                                        <label class="form-check-label" for="genderFemale">
+                                            Female
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="headCircumference" class="form-label">Head Circumference (mm)</label>
+                                    <input type="number" class="form-control" id="headCircumference" name="Head circumference" placeholder="e.g., 570">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="headBreadth" class="form-label">Head Breadth (mm)</label>
+                                    <input type="number" class="form-control" id="headBreadth" name="Head breadth" placeholder="e.g., 150">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="headLength" class="form-label">Head Length (mm)</label>
+                                    <input type="number" class="form-control" id="headLength" name="Head length" placeholder="e.g., 210">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="totalHeadHeight" class="form-label">Total Head Height (mm)</label>
+                                    <input type="number" class="form-control" id="totalHeadHeight" name="Total head height" placeholder="e.g., 230">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bitragionBreadth" class="form-label">Bitragion Breadth (mm)</label>
+                                    <input type="number" class="form-control" id="bitragionBreadth" name="Bitragion breadth" placeholder="e.g., 160">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="frontotemporaleBreadth" class="form-label">Frontotemporale Breadth (mm)</label>
+                                    <input type="number" class="form-control" id="frontotemporaleBreadth" name="Frontotemporale breadth" placeholder="e.g., 140">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bizygomaticBreadth" class="form-label">Bizygomatic Breadth (mm)</label>
+                                    <input type="number" class="form-control" id="bizygomaticBreadth" name="Bizygomatic breadth" placeholder="e.g., 135">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="inionToVertexHeight" class="form-label">Inion to Vertex Height (mm)</label>
+                                    <input type="number" class="form-control" id="inionToVertexHeight" name="Inion to vertex height" placeholder="e.g., 180">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="sagittalArc" class="form-label">Sagittal Arc (mm)</label>
+                                    <input type="number" class="form-control" id="sagittalArc" name="Sagittal arc" placeholder="e.g., 220">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bitragionArc" class="form-label">Bitragion Arc (mm)</label>
+                                    <input type="number" class="form-control" id="bitragionArc" name="Bitragion arc" placeholder="e.g., 230">
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check-circle me-2"></i>Analyze Fit
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if analysis_result %}
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Fit Analysis Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="alert 
+                                {% if analysis_result.size_fit == 'Too small for standard sizes' or analysis_result.size_fit == 'Too large for standard sizes' %}
+                                    alert-danger
+                                {% elif 'Upper end of size range' in analysis_result.size_fit or 'Lower end of size range' in analysis_result.size_fit %}
+                                    alert-warning
+                                {% else %}
+                                    alert-success
+                                {% endif %}
+                            ">
+                                <h5 class="alert-heading">Size Recommendation: 
+                                    <strong>{{ analysis_result.recommended_size }}</strong>
+                                </h5>
+                                <p>{{ analysis_result.size_fit }}</p>
+                            </div>
+                            
+                            <h6 class="mt-4">Measurement Analysis:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Measurement</th>
+                                            <th>Value (mm)</th>
+                                            <th>Percentile</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for param, data in analysis_result.fit_analysis.items() %}
+                                        <tr>
+                                            <td>{{ param }}</td>
+                                            <td>{{ data.value|round(1) }}</td>
+                                            <td>
+                                                {% if data.percentile is number %}
+                                                    {{ data.percentile|round(1) }}
+                                                {% else %}
+                                                    {{ data.percentile }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if data.status == 'WITHIN RANGE' %}
+                                                        bg-success
+                                                    {% elif data.status == 'WITHIN CLEARANCE' %}
+                                                        bg-warning
+                                                    {% else %}
+                                                        bg-danger
+                                                    {% endif %}
+                                                ">
+                                                    {{ data.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Visualization of Measurements vs Design Range:</h6>
+                            <img src="{{ url_for('design_files', filename=fit_image) }}" alt="Individual Fit Visualization" class="img-fluid">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>MIL-STD-1472 Compliance Assessment:</h6>
+                        {% set total = analysis_result.fit_analysis|length %}
+                        {% set within_range = namespace(count=0) %}
+                        {% set within_clearance = namespace(count=0) %}
+                        {% set outside_range = namespace(count=0) %}
+                        
+                        {% for param, data in analysis_result.fit_analysis.items() %}
+                            {% if data.status == 'WITHIN RANGE' %}
+                                {% set within_range.count = within_range.count + 1 %}
+                            {% elif data.status == 'WITHIN CLEARANCE' %}
+                                {% set within_clearance.count = within_clearance.count + 1 %}
+                            {% else %}
+                                {% set outside_range.count = outside_range.count + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if outside_range.count > 0 %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Non-compliant with MIL-STD-1472 Section 4.4.1 (Population Accommodation)</strong>
+                                <p>{{ outside_range.count }} out of {{ total }} measurements fall outside the 5th-95th percentile design range.</p>
+                                <p>Consider custom fit options for optimal comfort and safety.</p>
+                            </div>
+                        {% elif within_clearance.count > 0 %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Partially compliant with MIL-STD-1472 Section 4.4.1</strong>
+                                <p>All measurements are within design parameters, but {{ within_clearance.count }} rely on clearance adjustments.</p>
+                                <p>Standard helmet should fit with proper adjustment and padding.</p>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Fully compliant with MIL-STD-1472 Section 4.4.1</strong>
+                                <p>All measurements are well within the standard design range.</p>
+                                <p>Standard helmet should provide excellent fit and comfort.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

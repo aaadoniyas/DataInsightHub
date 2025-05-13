@@ -1,0 +1,54 @@
+import numpy as np
+import pandas as pd
+from flask import Flask, send_file
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+app = Flask(__name__)
+
+def create_dataframe():
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.precision", 3)
+    np.set_printoptions(precision=3, suppress=True)
+
+    np.random.seed(0)
+    columns = [
+        "Total head height", "Stomion to vertex height", "Pronasale to vertex height", "Inion to vertex height",
+        "Right tragion to vertex height", "Right ectocanthion to vertex height", "Face length", "Glabella to vertex height",
+        "Menton to subnasale length", "Nose length", "Head circumference", "Head length",
+        "Right tragion to ectocanthion length", "Head breadth", "Frontotemporale breadth", "Bitragion breadth",
+        "Bizygomatic breadth", "Biocular breadth", "Interpupillary distance", "Interocular breadth",
+        "Nasal root breadth", "Nose breadth", "Mouth breadth", "Bigonial breadth",
+        "Right tragion to ectocanthion breadth", "Ear length", "Sagittal arc", "Bitragion arc",
+        "Morphologic face height", "Left ectocanthion to vertex height", "Left tragion to vertex height",
+        "Occiput to left ectocanthion distance", "Occiput to left tragion distance", "Occiput to stomion distance",
+        "Glabella to subnasale height", "Physiognomic face height", "Occiput to right tragion distance",
+        "Occiput to right ectocanthion distance", "Sellion to vertex height", "Subnasale to vertex height"
+    ]
+    means = np.array([
+        230, 160, 170, 180, 175, 165, 200, 155, 70, 50, 570, 210, 45, 150, 140, 160, 135, 65, 60, 40,
+        30, 35, 80, 120, 50, 60, 220, 230, 180, 150, 150, 180, 185, 190, 120, 190, 175, 175, 140, 160
+    ])
+    stds = np.array([
+        10, 8, 8, 8, 7, 7, 10, 7, 5, 4, 15, 10, 4, 6, 6, 6, 5, 4, 3, 3,
+        2, 2, 4, 6, 3, 4, 12, 12, 10, 5, 5, 7, 7, 8, 4, 8, 7, 7, 5, 5
+    ])
+    num_samples = 100
+    data = np.random.normal(loc=means, scale=stds, size=(num_samples, len(columns)))
+    return pd.DataFrame(data, columns=columns)
+
+@app.route('/')
+def download():
+    df = create_dataframe()
+    
+    # Create Excel writer object
+    with pd.ExcelWriter('measurements_data.xlsx', engine='openpyxl') as writer:
+        # Write raw data to first sheet
+        df.to_excel(writer, sheet_name='Raw Data', index=False)
+        
+        # Calculate statistics
+        percentiles = df.quantile([0.05, 0.50, 0.95]).round(3)
+        percentiles.index = ['5th Percentile', '50th Percentile', '95th Percentile']
+        
+        # Perform PCA

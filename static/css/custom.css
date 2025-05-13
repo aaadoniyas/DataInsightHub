@@ -1,0 +1,131 @@
+/* Custom styles for anthropometric data app */
+
+/* Card styles */
+.card {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Measurement types grouping */
+.measurement-group {
+    border-left: 3px solid var(--bs-primary);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+/* Table adjustments */
+.table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+.table {
+    font-size: 0.875rem;
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--bs-dark);
+    z-index: 10;
+}
+
+/* PCA loadings display */
+.loading-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loading-value {
+    font-weight: bold;
+}
+
+.positive {
+    color: var(--bs-success);
+}
+
+.negative {
+    color: var(--bs-danger);
+}
+
+/* Download button */
+.download-section {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Image thumbnails */
+.plot-thumbnail {
+    cursor: pointer;
+    transition: transform 0.2s;
+    border-radius: 0.25rem;
+    max-width: 100%;
+    height: auto;
+}
+
+.plot-thumbnail:hover {
+    transform: scale(1.02);
+}
+
+/* Modal image */
+.modal-image {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Header section */
+.app-header {
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-dark) 100%);
+    border-radius: 0 0 1rem 1rem;
+}
+
+/* Footer section */
+.app-footer {
+    padding: 2rem 0;
+    margin-top: 3rem;
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+}
+
+/* Measurement definition tooltip */
+.measurement-info {
+    cursor: help;
+    color: var(--bs-info);
+    margin-left: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+}
+
+/* Loading spinner animations */
+.spinner-border {
+    margin-right: 0.5rem;
+}
